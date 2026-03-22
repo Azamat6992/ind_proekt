@@ -24,7 +24,7 @@
         <div class="number">1</div>
         <h3><b>Таймер Помодоро для учёбы</b>:</h3><p>Учи 25 минут на полную, потом 5 минут перерыв (чай, растяжка). 
         После 4 циклов — длинный перерыв 15–30 мин. Приложение типа Focus Booster бесплатно. 
-        Помогает не выгорать и впитывать материал лучше, чем бесконечный марафон.</p>
+        Помогает не выгорать и впитывать материал лучше, чем бесконечный марафон<a href="#pomodoro">Подробнее</a></p>
     </div>
 
     <div class="laifhack">
@@ -84,7 +84,249 @@
            <h3><b> Корзина для отвлекашек</b>:</h3> </p>Положи телефон/планшет в ящик на время учёбы 
             (на 25 мин по Помодоро). Звук на беззвучный. Факт: без скролла продуктивность x2, проверено.</p>
            </div>
-           </div>
+
+               <div id="pomodoro" class="pomodoro-card">
+        <div class="timer-header">
+            <h2>🍅 Pomodoro таймер</h2>
+            <div class="mode-badge" id="modeLabel">Фокус 25:00</div>
+        </div>
+        <div class="timer-display">
+            <div class="time-circle" id="timerDisplay">25:00</div>
+            <div class="timer-controls">
+                <button class="btn-timer primary" id="startPauseBtn">▶ Старт</button>
+                <button class="btn-timer reset-btn" id="resetBtn">⟳ Сброс</button>
+
+        <div class="session-info" id="sessionInfo">
+            ⏳ 25 мин учебы → 5 мин отдыха → 4 цикла → длинный перерыв
+        </div>
+    </div>
+    <script>
+    (function() {
+        // --- Конфигурация Pomodoro ---
+        // Длительность в секундах
+        const POMODORO_TIME = 25 * 60;    // 25 минут
+        const SHORT_BREAK = 5 * 60;       // 5 минут
+        const LONG_BREAK = 15 * 60;       // 15 минут
+
+        // DOM элементы
+        const timerDisplayElem = document.getElementById('timerDisplay');
+        const startPauseBtn = document.getElementById('startPauseBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const modeLabel = document.getElementById('modeLabel');
+        const sessionInfoSpan = document.getElementById('sessionInfo');
+
+        // состояние таймера
+        let currentState = 'pomodoro';   // 'pomodoro', 'shortBreak', 'longBreak'
+        let timeLeft = POMODORO_TIME;     // текущее оставшееся время (сек)
+        let timerInterval = null;
+        let isRunning = false;
+        let cyclesCompleted = 0;           // сколько помодоро завершено (для отслеживания длинного перерыва)
+        
+        // Функция обновления текста на экране
+        function updateDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerDisplayElem.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Обновить текстовый лейбл режима
+        function updateModeLabel() {
+            if (currentState === 'pomodoro') {
+                modeLabel.textContent = '🍅 Фокус 25:00';
+                sessionInfoSpan.innerHTML = '📚 Учёба 25 мин → затем перерыв. После 4 циклов — длинный отдых 15 мин.';
+            } else if (currentState === 'shortBreak') {
+                modeLabel.textContent = '☕ Короткий перерыв 5:00';
+                sessionInfoSpan.innerHTML = '🧘 Перерыв 5 минут. Подвигайся, выпей воды.';
+            } else if (currentState === 'longBreak') {
+                modeLabel.textContent = '🌿 Длинный перерыв 15:00';
+                sessionInfoSpan.innerHTML = '✨ Отличная работа! Длинный отдых 15 минут. Потом снова фокус.';
+            }
+        }
+
+        // Переключение режима (после завершения таймера)
+        function switchMode() {
+            if (currentState === 'pomodoro') {
+                // помидор завершен -> увеличиваем счетчик циклов
+                cyclesCompleted++;
+                // после 4 помидоров -> длинный перерыв, иначе короткий
+                if (cyclesCompleted % 4 === 0) {
+                    currentState = 'longBreak';
+                    timeLeft = LONG_BREAK;
+                } else {
+                    currentState = 'shortBreak';
+                    timeLeft = SHORT_BREAK;
+                }
+            } 
+            else if (currentState === 'shortBreak') {
+                // короткий перерыв закончен -> снова помидор
+                currentState = 'pomodoro';
+                timeLeft = POMODORO_TIME;
+            } 
+            else if (currentState === 'longBreak') {
+                // длинный перерыв закончен -> снова помидор, циклы продолжаются (не сбрасываем, но можно оставить)
+                currentState = 'pomodoro';
+                timeLeft = POMODORO_TIME;
+                // cyclesCompleted не сбрасываем, чтобы следующая серия из 4 помидоров шла по логике, но многие оставляют так.
+                // пользователь может сбросить вручную кнопкой. Логично: после длинного перерыва счетчик продолжает расти,
+                // но следующий длинный перерыв будет через 4 помидора. Оставляем как классический pomodoro.
+            }
+            updateModeLabel();
+            updateDisplay();
+        }
+
+        // Звуковое оповещение (мягкий beep, если поддерживается браузером)
+        function playNotificationSound() {
+            try {
+                // создаем короткий "пик" через Web Audio или простой beep с Oscillator? 
+                // Используем простой и надежный способ: Audio context с осторожностью.
+                // Но чтобы не запрашивать разрешение, делаем простой beep с помощью Audio? 
+                // Лучше использовать простой синтик, но некоторые браузеры блокируют без взаимодействия.
+                // Так как звук вызывается по завершению таймера (пользователь уже нажал старт) — безопасно.
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                oscillator.frequency.value = 880;
+                gainNode.gain.value = 0.3;
+                oscillator.start();
+                gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.8);
+                oscillator.stop(audioCtx.currentTime + 0.8);
+                // возобновляем аудиоконтекст если он suspended
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+            } catch(e) {
+                // если звук не поддерживается, просто игнорируем
+                console.log("звук не доступен");
+            }
+        }
+
+        // Завершение текущего интервала
+        function finishTimer() {
+            // остановить интервал
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            isRunning = false;
+            startPauseBtn.textContent = '▶ Старт';
+            // проигрываем уведомление
+            playNotificationSound();
+            // переключаем режим
+            switchMode();
+            // таймер остановлен, но время уже обновлено через switchMode, нужно отобразить
+            // дополнительно проверим, что интервал не запущен
+        }
+
+        // Основной тик таймера
+        function tick() {
+            if (timeLeft <= 1) {
+                // Время вышло
+                if (timeLeft === 1) {
+                    timeLeft = 0;
+                    updateDisplay();
+                }
+                // завершаем текущий сеанс
+                finishTimer();
+            } else {
+                timeLeft--;
+                updateDisplay();
+            }
+        }
+
+        // Запуск таймера
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            isRunning = true;
+            timerInterval = setInterval(() => {
+                tick();
+            }, 1000);
+            startPauseBtn.textContent = '⏸ Пауза';
+        }
+
+        // Пауза
+        function pauseTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            isRunning = false;
+            startPauseBtn.textContent = '▶ Старт';
+        }
+
+        // Сброс таймера к текущему режиму по умолчанию (начало помодоро или текущий режим сбрасывается к дефолтным значениям)
+        function resetTimer() {
+            // Останавливаем любой бегущий интервал
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            isRunning = false;
+            startPauseBtn.textContent = '▶ Старт';
+            
+            // Сброс параметров: возвращаем в режим помодоро, сбрасываем счетчик циклов? 
+            // Чтобы было интуитивно: полный сброс до начального Pomodoro (25:00), циклы обнуляются
+            currentState = 'pomodoro';
+            cyclesCompleted = 0;
+            timeLeft = POMODORO_TIME;
+            updateModeLabel();
+            updateDisplay();
+        }
+
+        // Обработчик кнопки старт/пауза
+        function onStartPause() {
+            if (isRunning) {
+                pauseTimer();
+            } else {
+                // если таймер на нуле? (время 0) - такое возможно если после finishTimer режим сменился, но timeLeft >0 всегда
+                // дополнительная проверка: если timeLeft <= 0, то делаем ресет режима? 
+                if (timeLeft <= 0) {
+                    // аварийная синхронизация
+                    resetTimer();
+                }
+                startTimer();
+            }
+        }
+
+        // Инициализация отображения
+        function initDisplay() {
+            updateDisplay();
+            updateModeLabel();
+            startPauseBtn.addEventListener('click', onStartPause);
+            resetBtn.addEventListener('click', resetTimer);
+        }
+
+        // Служебная функция: если вкладка неактивна, setInterval замедляется, но для таймера это не критично.
+        // Дополнительно обновляем document title для красоты
+        function updateDocumentTitle() {
+            if (!document.hidden && isRunning) {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                document.title = `⏲ ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} — Помодоро`;
+            } else if (!isRunning) {
+                document.title = `Помодоро таймер | Лайфхаки`;
+            }
+        }
+        
+        // следим за таймером и title
+        setInterval(() => {
+            if (isRunning) {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                document.title = `🍅 ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} — учёба`;
+            } else {
+                document.title = `Лайфхаки + Помодоро`;
+            }
+        }, 500);
+        
+        initDisplay();
+        
+        // Дополнительно: если пользователь кликнул на старт в первый раз, а аудиоконтекст будет создан по завершении.
+        // Для лучшего UX ничего не блокируем.
+    })();
+</script>
+</div>
 
 </body>
 </html>

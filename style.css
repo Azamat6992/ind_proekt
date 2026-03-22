@@ -36,7 +36,6 @@ border-radius: 20px;
 border:solid black;
 }
 
-
 .laifhack {
         flex-direction: column;
     display: flex;
@@ -53,11 +52,25 @@ border: solid black;
 top: -10px;
 }
 
-.laifhack:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+a {
+position: absolute;
+bottom: 224px;
+right: 48%;
+width: 110px;
+height: 29px;
+background: linear-gradient( 135deg, #667eea 0%, purple 100%);
+color: black;
+display: flex;
+align-items: center;
+justify-content: center;
+text-decoration: none;
+border-radius: 10px;
 }
 
+a:hover {
+  transform: translateY(-2px);
+  text-shadow: 0 8px 16px rgba(0,0,0,0.2);
+}
 
 .number {
     display: flex;
@@ -73,3 +86,123 @@ border-radius: 50%;
 font-size: 25px;
 border: 2px solid black;
 }
+
+ /* ---------- ТАЙМЕР ПОМОДОРО (уникальный блок) ---------- */
+        .pomodoro-card {
+            background: #ffffff;
+            border-radius: 2rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 18px 30px -12px linear-gradient( 135deg, #667eea 0%, purple 100%);
+            overflow: hidden;
+            transition: all 0.2s;
+            border: 1px solid linear-gradient( 135deg, #667eea 0%, purple 100%);
+        }
+
+        .timer-header {
+            background: linear-gradient( 135deg, #667eea 0%, purple 100%);
+            padding: 0.9rem 1.8rem;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .timer-header h2 {
+            font-weight: 600;
+            font-size: 1.5rem;
+            letter-spacing: -0.2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .timer-header h2:before {
+            content: "⏱️";
+            font-size: 1.5rem;
+        }
+
+        .mode-badge {
+            background: blue;
+            padding: 5px 14px;
+            border-radius: 60px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            backdrop-filter: blur(2px);
+        }
+
+        .timer-display {
+            background: #fefcf0;
+            text-align: center;
+            padding: 2rem 1rem 1rem;
+        }
+
+        .time-circle {
+            font-size: 5.2rem;
+            font-weight: 800;
+            font-family: 'JetBrains Mono', 'Fira Mono', monospace;
+            letter-spacing: 4px;
+            background: linear-gradient( 135deg, #667eea 0%, purple 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            text-shadow: linear-gradient( 135deg, #667eea 0%, purple 100%);
+            margin-bottom: 0.5rem;
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin: 1.2rem 0 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-timer {
+            background: #eff3f6;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 0.7rem 1.8rem;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            color: blue;
+            box-shadow: 0 2px 4px linear-gradient( 135deg, #667eea 0%, purple 100%);
+        }
+
+        .btn-timer.primary {
+            background: linear-gradient( 135deg, #667eea 0%, purple 100%);
+            color: white;
+            box-shadow: 0 6px 12px -8px linear-gradient( 135deg, #667eea 0%, purple 100%);
+        }
+
+        .btn-timer.primary:hover {
+            background: linear-gradient( 135deg, #667eea 0%, purple 100%);
+            transform: scale(0.97);
+        }
+
+        .btn-timer.reset-btn {
+            background: #e9eef3;
+            color: blue;
+        }
+
+        .btn-timer.reset-btn:hover {
+            background: #dce3ea;
+        }
+
+        .btn-timer:active {
+            transform: scale(0.96);
+        }
+
+        .session-info {
+            background: #f4f9fe;
+            padding: 0.7rem;
+            text-align: center;
+            font-size: 0.85rem;
+            color: blue;
+            border-top: 1px solid #e2edf2;
+            font-weight: 500;
+        }
