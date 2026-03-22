@@ -52,6 +52,11 @@ border: solid black;
 top: -10px;
 }
 
+
+.laifhack:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);}
+
 a {
 position: absolute;
 bottom: 224px;
